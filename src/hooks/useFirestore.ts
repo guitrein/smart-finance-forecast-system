@@ -54,7 +54,7 @@ export function useFirestore<T>(collectionName: string) {
       const docRef = await addDoc(collection(db, collectionName), {
         ...item,
         criadoEm: Timestamp.now().toDate().toISOString()
-      });
+      } as any);
       toast({
         title: "Sucesso",
         description: "Item adicionado com sucesso",
@@ -73,7 +73,7 @@ export function useFirestore<T>(collectionName: string) {
 
   const update = async (id: string, updates: Partial<T>) => {
     try {
-      await updateDoc(doc(db, collectionName, id), updates);
+      await updateDoc(doc(db, collectionName, id), updates as any);
       toast({
         title: "Sucesso",
         description: "Item atualizado com sucesso",
