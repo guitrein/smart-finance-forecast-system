@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
@@ -9,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { calcularDataVencimentoCartao, isCartao, getCartaoById } from '@/utils/cartaoUtils';
 
 export const CriarLancamento = () => {
   const { add } = useFirestore<Lancamento>('lancamentos');
@@ -42,8 +42,20 @@ export const CriarLancamento = () => {
     }
 
     try {
+      // Verificar se a conta selecionada é um cartão
+      const ehCartao = isCartao(formData.contaVinculada, cartoes);
+      let dataFinal = formData.data;
+
+      // Se for cartão, calcular a data de vencimento
+      if (ehCartao) {
+        const cartao = getCartaoById(formData.contaVinculada, cartoes);
+        if (cartao) {
+          dataFinal = calcularDataVencimentoCartao(formData.data, cartao.diaVencimento);
+        }
+      }
+
       const novoLancamento: Omit<Lancamento, 'id' | 'criadoEm'> = {
-        data: formData.data,
+        data: dataFinal,
         descricao: formData.descricao,
         categoria: formData.categoria,
         tipo: formData.tipo,
@@ -74,6 +86,14 @@ export const CriarLancamento = () => {
       });
       
       setOpen(false);
+
+      // Mostrar mensagem específica para cartões
+      if (ehCartao) {
+        toast({
+          title: "Lançamento criado!",
+          description: `Data ajustada para vencimento do cartão: ${new Date(dataFinal).toLocaleDateString('pt-BR')}`,
+        });
+      }
     } catch (error) {
       console.error('Erro ao criar lançamento:', error);
     }

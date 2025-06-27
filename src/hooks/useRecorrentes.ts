@@ -1,11 +1,13 @@
 
 import { useFirestore } from './useFirestore';
-import { Recorrente, Lancamento } from '@/types';
-import { addMonths, addDays, format } from 'date-fns';
+import { Recorrente, Lancamento, Cartao } from '@/types';
+import { addMonths, format } from 'date-fns';
+import { calcularDataVencimentoCartao, isCartao, getCartaoById } from '@/utils/cartaoUtils';
 
 export const useRecorrentes = () => {
   const recorrentesHook = useFirestore<Recorrente>('recorrentes');
   const lancamentosHook = useFirestore<Lancamento>('lancamentos');
+  const { data: cartoes } = useFirestore<Cartao>('cartoes');
 
   const calcularProximaData = (dataInicial: string, frequencia: Recorrente['frequencia'], parcela: number): string => {
     const data = new Date(dataInicial);
@@ -31,12 +33,21 @@ export const useRecorrentes = () => {
       // Primeiro, criar o recorrente
       const recorrenteId = await recorrentesHook.add(recorrente);
       
+      // Verificar se a conta é um cartão
+      const ehCartao = isCartao(recorrente.contaVinculada, cartoes);
+      const cartao = ehCartao ? getCartaoById(recorrente.contaVinculada, cartoes) : null;
+      
       // Depois, gerar os lançamentos
       const numParcelas = recorrente.parcelas || 12; // Se não especificado, gera 12 meses
       const lancamentosParaGerar = Math.min(numParcelas, 6); // Gera no máximo 6 lançamentos iniciais
       
       for (let i = 0; i < lancamentosParaGerar; i++) {
-        const dataLancamento = calcularProximaData(recorrente.dataInicial, recorrente.frequencia, i);
+        let dataLancamento = calcularProximaData(recorrente.dataInicial, recorrente.frequencia, i);
+        
+        // Se for cartão, ajustar a data para o vencimento
+        if (ehCartao && cartao) {
+          dataLancamento = calcularDataVencimentoCartao(dataLancamento, cartao.diaVencimento);
+        }
         
         const novoLancamento: Omit<Lancamento, 'id' | 'criadoEm'> = {
           data: dataLancamento,
