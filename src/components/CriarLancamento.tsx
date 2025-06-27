@@ -51,9 +51,12 @@ export const CriarLancamento = () => {
         contaVinculada: formData.contaVinculada,
         recorrente: formData.recorrente,
         parcelado: formData.parcelado,
-        numeroParcelas: formData.parcelado ? parseInt(formData.numeroParcelas) : undefined,
-        parcelaAtual: formData.parcelado ? 1 : undefined,
-        grupoParcelamento: formData.parcelado ? `${Date.now()}` : undefined
+        // Só incluir campos de parcelamento se estiver parcelado
+        ...(formData.parcelado && {
+          numeroParcelas: parseInt(formData.numeroParcelas),
+          parcelaAtual: 1,
+          grupoParcelamento: `${Date.now()}`
+        })
       };
 
       await add(novoLancamento);
