@@ -1,9 +1,12 @@
-
 import { useState, useMemo } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Lancamento, Conta, Cartao, Categoria } from '@/types';
 import { StatCard } from './StatCard';
 import { ConnectionStatus } from './ConnectionStatus';
+import { CriarLancamento } from './CriarLancamento';
+import { CriarRecorrente } from './CriarRecorrente';
+import { CriarConta } from './CriarConta';
+import { CriarCartao } from './CriarCartao';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -87,6 +90,14 @@ export const Dashboard = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <ConnectionStatus connected={connected} />
+      </div>
+
+      {/* Botões de ação */}
+      <div className="flex flex-wrap gap-3">
+        <CriarLancamento />
+        <CriarRecorrente />
+        <CriarConta />
+        <CriarCartao />
       </div>
 
       {/* Filtros */}
