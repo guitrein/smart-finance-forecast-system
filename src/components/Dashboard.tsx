@@ -18,8 +18,8 @@ export const Dashboard = () => {
   const [filtros, setFiltros] = useState({
     dataInicial: '',
     dataFinal: '',
-    categoria: '',
-    conta: ''
+    categoria: 'todas',
+    conta: 'todas'
   });
 
   const dadosFiltrados = useMemo(() => {
@@ -31,10 +31,10 @@ export const Dashboard = () => {
     if (filtros.dataFinal) {
       dados = dados.filter(l => l.data <= filtros.dataFinal);
     }
-    if (filtros.categoria) {
+    if (filtros.categoria && filtros.categoria !== 'todas') {
       dados = dados.filter(l => l.categoria === filtros.categoria);
     }
-    if (filtros.conta) {
+    if (filtros.conta && filtros.conta !== 'todas') {
       dados = dados.filter(l => l.contaVinculada === filtros.conta);
     }
 
@@ -66,8 +66,8 @@ export const Dashboard = () => {
     setFiltros({
       dataInicial: '',
       dataFinal: '',
-      categoria: '',
-      conta: ''
+      categoria: 'todas',
+      conta: 'todas'
     });
   };
 
@@ -119,7 +119,7 @@ export const Dashboard = () => {
                 <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="todas">Todas</SelectItem>
                 {categorias.map(cat => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.icone} {cat.nome}
@@ -138,7 +138,7 @@ export const Dashboard = () => {
                 <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="todas">Todas</SelectItem>
                 {contasECartoes.map(item => (
                   <SelectItem key={item.id} value={item.id}>
                     {item.nome}
