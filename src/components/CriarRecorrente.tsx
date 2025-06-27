@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
+import { useRecorrentes } from '@/hooks/useRecorrentes';
 import { useFirestore } from '@/hooks/useFirestore';
-import { Recorrente, Categoria, Conta, Cartao } from '@/types';
+import { Categoria, Conta, Cartao } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Repeat } from 'lucide-react';
 
 export const CriarRecorrente = () => {
-  const { add } = useFirestore<Recorrente>('recorrentes');
+  const { gerarLancamentosRecorrentes } = useRecorrentes();
   const { data: categorias } = useFirestore<Categoria>('categorias');
   const { data: contas } = useFirestore<Conta>('contas');
   const { data: cartoes } = useFirestore<Cartao>('cartoes');
@@ -31,7 +31,7 @@ export const CriarRecorrente = () => {
     e.preventDefault();
     
     try {
-      const novoRecorrente: Omit<Recorrente, 'id' | 'criadoEm'> = {
+      const novoRecorrente = {
         dataInicial: formData.dataInicial,
         descricao: formData.descricao,
         categoria: formData.categoria,
@@ -43,7 +43,7 @@ export const CriarRecorrente = () => {
         parcelasGeradas: 0
       };
 
-      await add(novoRecorrente);
+      await gerarLancamentosRecorrentes(novoRecorrente);
       
       setFormData({
         dataInicial: new Date().toISOString().split('T')[0],
