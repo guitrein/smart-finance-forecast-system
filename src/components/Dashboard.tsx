@@ -119,6 +119,8 @@ export const Dashboard = () => {
       <TabelaLancamentos
         lancamentos={dadosFiltrados}
         categorias={categorias}
+        contas={contas}
+        cartoes={cartoes}
         formatarMoeda={formatarMoeda}
       />
     </div>

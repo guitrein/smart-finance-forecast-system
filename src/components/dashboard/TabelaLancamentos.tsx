@@ -1,15 +1,20 @@
 
-import { Lancamento, Categoria } from '@/types';
+import { Lancamento, Categoria, Conta, Cartao } from '@/types';
+import { AcoesLancamento } from './AcoesLancamento';
 
 interface TabelaLancamentosProps {
   lancamentos: Lancamento[];
   categorias: Categoria[];
+  contas: Conta[];
+  cartoes: Cartao[];
   formatarMoeda: (valor: number) => string;
 }
 
 export const TabelaLancamentos = ({ 
   lancamentos, 
   categorias, 
+  contas,
+  cartoes,
   formatarMoeda 
 }: TabelaLancamentosProps) => {
   return (
@@ -35,6 +40,9 @@ export const TabelaLancamentos = ({
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Valor
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ações
               </th>
             </tr>
           </thead>
@@ -75,6 +83,14 @@ export const TabelaLancamentos = ({
                     <span className={lancamento.tipo === 'receita' ? 'text-green-600' : 'text-red-600'}>
                       {lancamento.tipo === 'receita' ? '+' : '-'}{formatarMoeda(lancamento.valor)}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <AcoesLancamento 
+                      lancamento={lancamento}
+                      categorias={categorias}
+                      contas={contas}
+                      cartoes={cartoes}
+                    />
                   </td>
                 </tr>
               );
