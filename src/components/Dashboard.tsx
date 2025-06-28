@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Lancamento, Conta, Cartao, Categoria } from '@/types';
@@ -10,7 +11,8 @@ import { FiltrosDashboard } from './dashboard/FiltrosDashboard';
 import { EstatisticasDashboard } from './dashboard/EstatisticasDashboard';
 import { TabelaLancamentos } from './dashboard/TabelaLancamentos';
 import { GerenciarCategorias } from './GerenciarCategorias';
-import { Button, Tag } from '@/components';
+import { Button } from '@/components/ui/button';
+import { Tag } from 'lucide-react';
 
 export const Dashboard = () => {
   const { data: lancamentos, loading: loadingLancamentos, connected } = useFirestore<Lancamento>('lancamentos');

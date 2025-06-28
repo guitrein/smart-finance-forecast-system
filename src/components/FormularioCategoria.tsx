@@ -43,10 +43,17 @@ export const FormularioCategoria = ({ categoria, onSuccess }: FormularioCategori
     try {
       setLoading(true);
       
+      const categoriaData = {
+        nome: data.nome,
+        descricao: data.descricao || '',
+        icone: data.icone,
+        cor: data.cor,
+      };
+      
       if (categoria) {
-        await update(categoria.id, data);
+        await update(categoria.id, categoriaData);
       } else {
-        await add(data);
+        await add(categoriaData);
       }
       
       onSuccess();
