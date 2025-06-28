@@ -1,15 +1,30 @@
 
 import { useState, useMemo } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
-import { Lancamento, Cartao, FaturaCartao, Vencimento, FluxoCaixaMensal } from '@/types';
+import { Lancamento, Cartao, Conta, FaturaCartao, Vencimento, FluxoCaixaMensal } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { FiltrosProjecoes } from './projecoes/FiltrosProjecoes';
 import { CreditCard, Calendar, TrendingUp } from 'lucide-react';
 
 export const ProjecoesCartoes = () => {
   const { data: lancamentos } = useFirestore<Lancamento>('lancamentos');
   const { data: cartoes } = useFirestore<Cartao>('cartoes');
+  const { data: contas } = useFirestore<Conta>('contas');
+
+  const [contasSelecionadas, setContasSelecionadas] = useState<string[]>([]);
+  const [cartoesSelecionados, setCartoesSelecionados] = useState<string[]>([]);
+
+  // Inicializar filtros com todas as contas e cartões selecionados
+  useState(() => {
+    if (contas.length > 0 && contasSelecionadas.length === 0) {
+      setContasSelecionadas(contas.map(c => c.id));
+    }
+    if (cartoes.length > 0 && cartoesSelecionados.length === 0) {
+      setCartoesSelecionados(cartoes.map(c => c.id));
+    }
+  });
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -18,15 +33,29 @@ export const ProjecoesCartoes = () => {
     }).format(valor);
   };
 
-  // Calcular faturas dos cartões
+  const limparFiltros = () => {
+    setContasSelecionadas(contas.map(c => c.id));
+    setCartoesSelecionados(cartoes.map(c => c.id));
+  };
+
+  // Filtrar dados baseado na seleção
+  const dadosFiltrados = useMemo(() => {
+    const contasECartoesSelecionados = [...contasSelecionadas, ...cartoesSelecionados];
+    return lancamentos.filter(l => contasECartoesSelecionados.includes(l.contaVinculada));
+  }, [lancamentos, contasSelecionadas, cartoesSelecionados]);
+
+  const cartoesFiltrados = useMemo(() => {
+    return cartoes.filter(c => cartoesSelecionados.includes(c.id));
+  }, [cartoes, cartoesSelecionados]);
+
+  // Calcular faturas dos cartões filtrados
   const faturasCartoes = useMemo((): FaturaCartao[] => {
-    return cartoes.map(cartao => {
-      const lancamentosCartao = lancamentos.filter(l => l.contaVinculada === cartao.id && l.tipo === 'despesa');
+    return cartoesFiltrados.map(cartao => {
+      const lancamentosCartao = dadosFiltrados.filter(l => l.contaVinculada === cartao.id && l.tipo === 'despesa');
       const usado = lancamentosCartao.reduce((total, l) => total + l.valor, 0);
       const disponivel = cartao.limite - usado;
       const percentualUsado = (usado / cartao.limite) * 100;
 
-      // Buscar próximas parcelas (próximos 5 lançamentos)
       const proximasParcelas = lancamentosCartao
         .filter(l => l.parcelado && new Date(l.data) >= new Date())
         .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
@@ -50,9 +79,9 @@ export const ProjecoesCartoes = () => {
         proximasParcelas
       };
     });
-  }, [cartoes, lancamentos]);
+  }, [cartoesFiltrados, dadosFiltrados]);
 
-  // Calcular próximos vencimentos (60 dias)
+  // Calcular próximos vencimentos
   const proximosVencimentos = useMemo((): Vencimento[] => {
     const hoje = new Date();
     const em60Dias = new Date();
@@ -60,8 +89,8 @@ export const ProjecoesCartoes = () => {
 
     const vencimentos: Vencimento[] = [];
 
-    // Vencimentos de faturas de cartões
-    cartoes.forEach(cartao => {
+    // Vencimentos de faturas de cartões filtrados
+    cartoesFiltrados.forEach(cartao => {
       const proximoVencimento = new Date(hoje.getFullYear(), hoje.getMonth(), cartao.diaVencimento);
       if (proximoVencimento < hoje) {
         proximoVencimento.setMonth(proximoVencimento.getMonth() + 1);
@@ -86,8 +115,8 @@ export const ProjecoesCartoes = () => {
       }
     });
 
-    // Vencimentos de parcelas
-    lancamentos
+    // Vencimentos de parcelas filtradas
+    dadosFiltrados
       .filter(l => l.parcelado && new Date(l.data) >= hoje && new Date(l.data) <= em60Dias)
       .forEach(lancamento => {
         const dataVencimento = new Date(lancamento.data);
@@ -108,9 +137,9 @@ export const ProjecoesCartoes = () => {
       });
 
     return vencimentos.sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
-  }, [cartoes, faturasCartoes, lancamentos]);
+  }, [cartoesFiltrados, faturasCartoes, dadosFiltrados]);
 
-  // Calcular fluxo de caixa (24 meses)
+  // Calcular fluxo de caixa com dados filtrados
   const fluxoCaixa = useMemo((): FluxoCaixaMensal[] => {
     const meses: FluxoCaixaMensal[] = [];
     const hoje = new Date();
@@ -121,8 +150,7 @@ export const ProjecoesCartoes = () => {
       
       const periodo = mesAtual.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
 
-      // Filtrar lançamentos do mês
-      const lancamentosMes = lancamentos.filter(l => {
+      const lancamentosMes = dadosFiltrados.filter(l => {
         const dataLancamento = new Date(l.data);
         return dataLancamento >= mesAtual && dataLancamento < proximoMes;
       });
@@ -148,7 +176,7 @@ export const ProjecoesCartoes = () => {
     }
 
     return meses;
-  }, [lancamentos]);
+  }, [dadosFiltrados]);
 
   const getStatusColor = (status: Vencimento['status']) => {
     switch (status) {
@@ -169,75 +197,86 @@ export const ProjecoesCartoes = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-[1920px] mx-auto">
       <div className="flex items-center gap-3">
         <CreditCard className="w-8 h-8 text-blue-600" />
-        <h1 className="text-3xl font-bold">Projeções & Cartões</h1>
+        <h1 className="text-4xl font-bold">Projeções & Cartões</h1>
       </div>
 
+      {/* Filtros */}
+      <FiltrosProjecoes
+        contas={contas}
+        cartoes={cartoes}
+        contasSelecionadas={contasSelecionadas}
+        cartoesSelecionados={cartoesSelecionados}
+        onContasChange={setContasSelecionadas}
+        onCartoesChange={setCartoesSelecionados}
+        onLimparFiltros={limparFiltros}
+      />
+
       <Tabs defaultValue="faturas" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="faturas">Faturas dos Cartões</TabsTrigger>
-          <TabsTrigger value="vencimentos">Próximos Vencimentos</TabsTrigger>
-          <TabsTrigger value="fluxo">Fluxo de Caixa</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-14 text-base">
+          <TabsTrigger value="faturas" className="text-base">Faturas dos Cartões</TabsTrigger>
+          <TabsTrigger value="vencimentos" className="text-base">Próximos Vencimentos</TabsTrigger>
+          <TabsTrigger value="fluxo" className="text-base">Fluxo de Caixa</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="faturas" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <TabsContent value="faturas" className="space-y-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
             {faturasCartoes.map(fatura => (
               <div key={fatura.cartaoId} className="bg-white rounded-xl shadow-lg border overflow-hidden hover:shadow-xl transition-shadow">
                 {/* Header do cartão */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
-                  <div className="flex justify-between items-start mb-4">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
+                  <div className="flex justify-between items-start mb-6">
                     <div>
-                      <h3 className="font-bold text-lg">{fatura.nome}</h3>
-                      <p className="text-blue-100">{fatura.bandeira}</p>
+                      <h3 className="font-bold text-xl">{fatura.nome}</h3>
+                      <p className="text-blue-100 text-lg">{fatura.bandeira}</p>
                     </div>
-                    <CreditCard className="w-8 h-8 text-blue-100" />
+                    <CreditCard className="w-10 h-10 text-blue-100" />
                   </div>
-                  <p className="text-sm text-blue-100">Vencimento dia {fatura.diaVencimento}</p>
+                  <p className="text-base text-blue-100">Vencimento dia {fatura.diaVencimento}</p>
                 </div>
 
                 {/* Informações do limite */}
-                <div className="p-6 space-y-4">
+                <div className="p-8 space-y-6">
                   <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-600">Limite utilizado</span>
-                      <span className="text-sm font-bold">{fatura.percentualUsado.toFixed(1)}%</span>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-base font-medium text-gray-600">Limite utilizado</span>
+                      <span className="text-base font-bold">{fatura.percentualUsado.toFixed(1)}%</span>
                     </div>
                     <Progress 
                       value={fatura.percentualUsado} 
-                      className={`h-3 ${getProgressColor(fatura.percentualUsado)}`}
+                      className={`h-4 ${getProgressColor(fatura.percentualUsado)}`}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-base">
                       <span className="text-gray-600">Limite total:</span>
                       <span className="font-semibold">{formatarMoeda(fatura.limite)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between text-base">
                       <span className="text-gray-600">Usado:</span>
                       <span className="font-semibold text-red-600">{formatarMoeda(fatura.usado)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between text-base">
                       <span className="text-gray-600">Disponível:</span>
                       <span className="font-semibold text-green-600">{formatarMoeda(fatura.disponivel)}</span>
                     </div>
                   </div>
 
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="font-semibold">Fatura atual:</span>
-                      <span className="text-lg font-bold text-red-600">{formatarMoeda(fatura.valorFatura)}</span>
+                  <div className="border-t pt-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="font-semibold text-base">Fatura atual:</span>
+                      <span className="text-xl font-bold text-red-600">{formatarMoeda(fatura.valorFatura)}</span>
                     </div>
 
                     {fatura.proximasParcelas.length > 0 && (
                       <div>
-                        <p className="text-sm font-medium text-gray-600 mb-2">Próximas parcelas:</p>
-                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                        <p className="text-base font-medium text-gray-600 mb-3">Próximas parcelas:</p>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
                           {fatura.proximasParcelas.map((parcela, index) => (
-                            <div key={index} className="flex justify-between text-xs bg-gray-50 p-2 rounded">
+                            <div key={index} className="flex justify-between text-sm bg-gray-50 p-3 rounded">
                               <span className="truncate">{parcela.descricao}</span>
                               <span className="font-medium">{formatarMoeda(parcela.valor)}</span>
                             </div>
@@ -252,54 +291,54 @@ export const ProjecoesCartoes = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="vencimentos" className="space-y-6">
+        <TabsContent value="vencimentos" className="space-y-8">
           <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-6 border-b">
+            <div className="p-8 border-b">
               <div className="flex items-center gap-3">
-                <Calendar className="w-6 h-6 text-blue-600" />
-                <h2 className="text-lg font-semibold">Vencimentos dos próximos 60 dias</h2>
+                <Calendar className="w-7 h-7 text-blue-600" />
+                <h2 className="text-xl font-semibold">Vencimentos dos próximos 60 dias</h2>
               </div>
             </div>
             
             <div className="divide-y">
               {proximosVencimentos.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>Nenhum vencimento encontrado para os próximos 60 dias</p>
+                <div className="p-12 text-center text-gray-500">
+                  <Calendar className="w-16 h-16 mx-auto mb-6 text-gray-300" />
+                  <p className="text-lg">Nenhum vencimento encontrado para os próximos 60 dias</p>
                 </div>
               ) : (
                 proximosVencimentos.map((vencimento, index) => (
-                  <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div key={index} className="p-6 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-6">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900">
+                          <div className="text-3xl font-bold text-gray-900">
                             {new Date(vencimento.data).getDate()}
                           </div>
-                          <div className="text-xs text-gray-500 uppercase">
+                          <div className="text-sm text-gray-500 uppercase">
                             {new Date(vencimento.data).toLocaleDateString('pt-BR', { month: 'short' })}
                           </div>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{vencimento.titulo}</h3>
-                          <div className="flex items-center gap-2 mt-1">
+                          <h3 className="font-semibold text-gray-900 text-lg">{vencimento.titulo}</h3>
+                          <div className="flex items-center gap-3 mt-2">
                             <Badge variant="outline" className={getStatusColor(vencimento.status)}>
                               {vencimento.status === 'vencido' && 'Vencido'}
                               {vencimento.status === 'urgente' && 'Urgente'}
                               {vencimento.status === 'atencao' && 'Atenção'}
                               {vencimento.status === 'ok' && 'OK'}
                             </Badge>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-sm text-gray-500">
                               {vencimento.tipo === 'fatura' ? '💳 Fatura' : '💰 Parcela'}
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-red-600">
+                        <div className="text-xl font-bold text-red-600">
                           {formatarMoeda(vencimento.valor)}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm text-gray-500">
                           {new Date(vencimento.data).toLocaleDateString('pt-BR')}
                         </div>
                       </div>
@@ -311,12 +350,12 @@ export const ProjecoesCartoes = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="fluxo" className="space-y-6">
+        <TabsContent value="fluxo" className="space-y-8">
           <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-6 border-b">
+            <div className="p-8 border-b">
               <div className="flex items-center gap-3">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
-                <h2 className="text-lg font-semibold">Projeção de Fluxo de Caixa - 24 meses</h2>
+                <TrendingUp className="w-7 h-7 text-blue-600" />
+                <h2 className="text-xl font-semibold">Projeção de Fluxo de Caixa - 24 meses</h2>
               </div>
             </div>
             
@@ -324,19 +363,19 @@ export const ProjecoesCartoes = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Período
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-8 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Saldo Inicial
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-8 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Receitas
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-8 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Despesas
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-8 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Saldo Final
                     </th>
                   </tr>
@@ -344,19 +383,19 @@ export const ProjecoesCartoes = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {fluxoCaixa.map((mes, index) => (
                     <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-8 py-5 whitespace-nowrap text-base font-medium text-gray-900">
                         {mes.periodo}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                      <td className="px-8 py-5 whitespace-nowrap text-base text-right">
                         {formatarMoeda(mes.saldoInicial)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-medium">
+                      <td className="px-8 py-5 whitespace-nowrap text-base text-right text-green-600 font-medium">
                         +{formatarMoeda(mes.receitasPrevistas)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-red-600 font-medium">
+                      <td className="px-8 py-5 whitespace-nowrap text-base text-right text-red-600 font-medium">
                         -{formatarMoeda(mes.despesasPrevistas)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold">
+                      <td className="px-8 py-5 whitespace-nowrap text-base text-right font-bold">
                         <span className={mes.saldoFinal >= 0 ? 'text-green-600' : 'text-red-600'}>
                           {formatarMoeda(mes.saldoFinal)}
                         </span>
