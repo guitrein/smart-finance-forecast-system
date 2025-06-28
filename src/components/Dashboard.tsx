@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Lancamento, Conta, Cartao, Categoria } from '@/types';
@@ -10,6 +9,8 @@ import { CriarCartao } from './CriarCartao';
 import { FiltrosDashboard } from './dashboard/FiltrosDashboard';
 import { EstatisticasDashboard } from './dashboard/EstatisticasDashboard';
 import { TabelaLancamentos } from './dashboard/TabelaLancamentos';
+import { GerenciarCategorias } from './GerenciarCategorias';
+import { Button, Tag } from '@/components';
 
 export const Dashboard = () => {
   const { data: lancamentos, loading: loadingLancamentos, connected } = useFirestore<Lancamento>('lancamentos');
@@ -23,6 +24,8 @@ export const Dashboard = () => {
     categoria: 'todas',
     conta: 'todas'
   });
+
+  const [mostrarCategorias, setMostrarCategorias] = useState(false);
 
   const dadosFiltrados = useMemo(() => {
     let dados = lancamentos;
@@ -81,6 +84,19 @@ export const Dashboard = () => {
     );
   }
 
+  if (mostrarCategorias) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => setMostrarCategorias(false)}>
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <GerenciarCategorias />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header com status de conexão */}
@@ -95,6 +111,10 @@ export const Dashboard = () => {
         <CriarRecorrente />
         <CriarConta />
         <CriarCartao />
+        <Button variant="outline" onClick={() => setMostrarCategorias(true)}>
+          <Tag className="w-4 h-4 mr-2" />
+          Gerenciar Categorias
+        </Button>
       </div>
 
       {/* Filtros */}
