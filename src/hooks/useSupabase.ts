@@ -20,10 +20,10 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
 
     try {
       setLoading(true);
+      // Buscar todos os dados sem filtrar por user_id
       const { data: result, error } = await supabase
         .from(tableName)
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -67,11 +67,11 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
   const update = async (id: string, updates: Partial<T>) => {
     if (!user) return;
 
+    // Remover filtro por user_id na atualização para permitir editar qualquer registro
     const { error } = await supabase
       .from(tableName)
       .update(updates as any)
-      .eq('id', id)
-      .eq('user_id', user.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Erro ao atualizar:', error);
@@ -84,11 +84,11 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
   const remove = async (id: string) => {
     if (!user) return;
 
+    // Remover filtro por user_id na exclusão para permitir deletar qualquer registro
     const { error } = await supabase
       .from(tableName)
       .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Erro ao remover:', error);
