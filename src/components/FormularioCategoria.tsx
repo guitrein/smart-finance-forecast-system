@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Categoria } from '@/types';
 
 const categoriaSchema = z.object({
@@ -26,7 +26,7 @@ interface FormularioCategoriaProps {
 }
 
 export const FormularioCategoria = ({ categoria, onSuccess }: FormularioCategoriaProps) => {
-  const { add, update } = useFirestore<Categoria>('categorias');
+  const { add, update } = useSupabase<Categoria>('categorias');
   const [loading, setLoading] = useState(false);
 
   const form = useForm<CategoriaFormData>({

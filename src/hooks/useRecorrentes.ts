@@ -1,13 +1,13 @@
 
-import { useFirestore } from './useFirestore';
+import { useSupabase } from './useSupabase';
 import { Recorrente, Lancamento, Cartao } from '@/types';
 import { addMonths, format } from 'date-fns';
 import { calcularDataVencimentoCartao, isCartao, getCartaoById } from '@/utils/cartaoUtils';
 
 export const useRecorrentes = () => {
-  const recorrentesHook = useFirestore<Recorrente>('recorrentes');
-  const lancamentosHook = useFirestore<Lancamento>('lancamentos');
-  const { data: cartoes } = useFirestore<Cartao>('cartoes');
+  const recorrentesHook = useSupabase<Recorrente>('recorrentes');
+  const lancamentosHook = useSupabase<Lancamento>('lancamentos');
+  const { data: cartoes } = useSupabase<Cartao>('cartoes');
 
   const calcularProximaData = (dataInicial: string, frequencia: Recorrente['frequencia'], parcela: number): string => {
     const data = new Date(dataInicial);
@@ -28,28 +28,24 @@ export const useRecorrentes = () => {
     }
   };
 
-  const gerarLancamentosRecorrentes = async (recorrente: Omit<Recorrente, 'id' | 'criadoEm'>) => {
+  const gerarLancamentosRecorrentes = async (recorrente: Omit<Recorrente, 'id' | 'created_at' | 'user_id'>) => {
     try {
-      // Primeiro, criar o recorrente
       const recorrenteId = await recorrentesHook.add(recorrente);
       
-      // Verificar se a conta é um cartão
       const ehCartao = isCartao(recorrente.contaVinculada, cartoes);
       const cartao = ehCartao ? getCartaoById(recorrente.contaVinculada, cartoes) : null;
       
-      // Depois, gerar os lançamentos
-      const numParcelas = recorrente.parcelas || 12; // Se não especificado, gera 12 meses
-      const lancamentosParaGerar = Math.min(numParcelas, 6); // Gera no máximo 6 lançamentos iniciais
+      const numParcelas = recorrente.parcelas || 12;
+      const lancamentosParaGerar = Math.min(numParcelas, 6);
       
       for (let i = 0; i < lancamentosParaGerar; i++) {
         let dataLancamento = calcularProximaData(recorrente.dataInicial, recorrente.frequencia, i);
         
-        // Se for cartão, ajustar a data para o vencimento
         if (ehCartao && cartao) {
           dataLancamento = calcularDataVencimentoCartao(dataLancamento, cartao.diaVencimento);
         }
         
-        const novoLancamento: Omit<Lancamento, 'id' | 'criadoEm'> = {
+        const novoLancamento = {
           data: dataLancamento,
           descricao: `${recorrente.descricao} (${i + 1}/${numParcelas})`,
           categoria: recorrente.categoria,
@@ -67,7 +63,6 @@ export const useRecorrentes = () => {
         await lancamentosHook.add(novoLancamento);
       }
       
-      // Atualizar o número de parcelas geradas no recorrente
       await recorrentesHook.update(recorrenteId, {
         parcelasGeradas: lancamentosParaGerar
       });

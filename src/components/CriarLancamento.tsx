@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,10 @@ import { toast } from '@/hooks/use-toast';
 import { calcularDataVencimentoCartao, isCartao, getCartaoById } from '@/utils/cartaoUtils';
 
 export const CriarLancamento = () => {
-  const { add } = useFirestore<Lancamento>('lancamentos');
-  const { data: categorias } = useFirestore<Categoria>('categorias');
-  const { data: contas } = useFirestore<Conta>('contas');
-  const { data: cartoes } = useFirestore<Cartao>('cartoes');
+  const { add } = useSupabase<Lancamento>('lancamentos');
+  const { data: categorias } = useSupabase<Categoria>('categorias');
+  const { data: contas } = useSupabase<Conta>('contas');
+  const { data: cartoes } = useSupabase<Cartao>('cartoes');
 
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -42,11 +42,9 @@ export const CriarLancamento = () => {
     }
 
     try {
-      // Verificar se a conta selecionada é um cartão
       const ehCartao = isCartao(formData.contaVinculada, cartoes);
       let dataFinal = formData.data;
 
-      // Se for cartão, calcular a data de vencimento
       if (ehCartao) {
         const cartao = getCartaoById(formData.contaVinculada, cartoes);
         if (cartao) {
@@ -54,7 +52,7 @@ export const CriarLancamento = () => {
         }
       }
 
-      const novoLancamento: Omit<Lancamento, 'id' | 'criadoEm'> = {
+      const novoLancamento = {
         data: dataFinal,
         descricao: formData.descricao,
         categoria: formData.categoria,
@@ -63,7 +61,6 @@ export const CriarLancamento = () => {
         contaVinculada: formData.contaVinculada,
         recorrente: formData.recorrente,
         parcelado: formData.parcelado,
-        // Só incluir campos de parcelamento se estiver parcelado
         ...(formData.parcelado && {
           numeroParcelas: parseInt(formData.numeroParcelas),
           parcelaAtual: 1,
@@ -87,7 +84,6 @@ export const CriarLancamento = () => {
       
       setOpen(false);
 
-      // Mostrar mensagem específica para cartões
       if (ehCartao) {
         toast({
           title: "Lançamento criado!",

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export function useSupabase<T>(tableName: string) {
+export function useSupabase<T extends Record<string, any>>(tableName: string) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(true);
@@ -59,7 +59,7 @@ export function useSupabase<T>(tableName: string) {
     }
 
     await fetchData();
-    return result;
+    return result.id;
   };
 
   const update = async (id: string, updates: Partial<T>) => {

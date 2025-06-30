@@ -1,7 +1,7 @@
 
 import { Categoria } from '@/types';
 
-export const categoriasPadrao: Omit<Categoria, 'id' | 'criadoEm'>[] = [
+export const categoriasPadrao: Omit<Categoria, 'id' | 'created_at' | 'user_id'>[] = [
   {
     nome: 'Salário',
     descricao: 'Salário e remuneração principal',

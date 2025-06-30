@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Cartao } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { CreditCard } from 'lucide-react';
 
 export const CriarCartao = () => {
-  const { add } = useFirestore<Cartao>('cartoes');
+  const { add } = useSupabase<Cartao>('cartoes');
   
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export const CriarCartao = () => {
     e.preventDefault();
     
     try {
-      const novoCartao: Omit<Cartao, 'id' | 'criadoEm'> = {
+      const novoCartao = {
         nome: formData.nome,
         bandeira: formData.bandeira,
         limite: parseFloat(formData.limite) || 0,

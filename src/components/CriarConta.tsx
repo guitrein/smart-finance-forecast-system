@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Conta } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Wallet } from 'lucide-react';
 
 export const CriarConta = () => {
-  const { add } = useFirestore<Conta>('contas');
+  const { add } = useSupabase<Conta>('contas');
   
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export const CriarConta = () => {
     e.preventDefault();
     
     try {
-      const novaConta: Omit<Conta, 'id' | 'criadoEm'> = {
+      const novaConta = {
         nome: formData.nome,
         banco: formData.banco,
         categoria: formData.categoria,

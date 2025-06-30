@@ -13,7 +13,7 @@ export interface Lancamento {
   numeroParcelas?: number;
   parcelaAtual?: number;
   grupoParcelamento?: string;
-  criadoEm: string;
+  created_at: string;
   user_id: string;
 }
 
@@ -28,7 +28,7 @@ export interface Recorrente {
   frequencia: 'mensal' | 'bimestral' | 'trimestral' | 'semestral' | 'anual';
   parcelas?: number | null;
   parcelasGeradas: number;
-  criadoEm: string;
+  created_at: string;
   user_id: string;
 }
 
@@ -40,7 +40,7 @@ export interface Conta {
   saldoInicial?: number;
   saldo?: number;
   tipo?: string;
-  criadoEm: string;
+  created_at: string;
   user_id: string;
 }
 
@@ -52,7 +52,7 @@ export interface Cartao {
   diaVencimento?: number;
   vencimento?: number;
   tipo?: string;
-  criadoEm: string;
+  created_at: string;
   user_id: string;
 }
 
@@ -62,7 +62,7 @@ export interface Categoria {
   descricao: string;
   icone: string;
   cor: string;
-  criadoEm: string;
+  created_at: string;
   user_id: string;
 }
 

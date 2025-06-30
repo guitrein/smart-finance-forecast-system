@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { useRecorrentes } from '@/hooks/useRecorrentes';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Categoria, Conta, Cartao } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,9 +12,9 @@ import { Repeat } from 'lucide-react';
 
 export const CriarRecorrente = () => {
   const { gerarLancamentosRecorrentes } = useRecorrentes();
-  const { data: categorias } = useFirestore<Categoria>('categorias');
-  const { data: contas } = useFirestore<Conta>('contas');
-  const { data: cartoes } = useFirestore<Cartao>('cartoes');
+  const { data: categorias } = useSupabase<Categoria>('categorias');
+  const { data: contas } = useSupabase<Conta>('contas');
+  const { data: cartoes } = useSupabase<Cartao>('cartoes');
 
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
