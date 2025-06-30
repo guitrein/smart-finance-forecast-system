@@ -51,7 +51,7 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
 
     const { data: result, error } = await supabase
       .from(tableName)
-      .insert([{ ...item, user_id: user.id }])
+      .insert([{ ...item, user_id: user.id } as any])
       .select()
       .single();
 
@@ -69,7 +69,7 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
 
     const { error } = await supabase
       .from(tableName)
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
       .eq('user_id', user.id);
 
