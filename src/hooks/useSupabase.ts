@@ -32,7 +32,7 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
         return;
       }
 
-      setData((result || []) as T[]);
+      setData((result || []) as unknown as T[]);
       setConnected(true);
     } catch (error) {
       console.error('Erro na conexão:', error);
