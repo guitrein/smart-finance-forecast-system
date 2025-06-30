@@ -14,6 +14,7 @@ export interface Lancamento {
   parcelaAtual?: number;
   grupoParcelamento?: string;
   criadoEm: string;
+  user_id: string;
 }
 
 export interface Recorrente {
@@ -28,26 +29,31 @@ export interface Recorrente {
   parcelas?: number | null;
   parcelasGeradas: number;
   criadoEm: string;
+  user_id: string;
 }
 
 export interface Conta {
   id: string;
   nome: string;
-  banco: string;
-  categoria: string;
-  saldoInicial: number;
-  tipo: string;
+  banco?: string;
+  categoria?: string;
+  saldoInicial?: number;
+  saldo?: number;
+  tipo?: string;
   criadoEm: string;
+  user_id: string;
 }
 
 export interface Cartao {
   id: string;
   nome: string;
-  bandeira: string;
+  bandeira?: string;
   limite: number;
-  diaVencimento: number;
-  tipo: string;
+  diaVencimento?: number;
+  vencimento?: number;
+  tipo?: string;
   criadoEm: string;
+  user_id: string;
 }
 
 export interface Categoria {
@@ -57,6 +63,7 @@ export interface Categoria {
   icone: string;
   cor: string;
   criadoEm: string;
+  user_id: string;
 }
 
 export interface FaturaCartao {

@@ -1,7 +1,8 @@
 
 import { useState, useMemo } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Lancamento, Conta, Cartao, Categoria } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 import { ConnectionStatus } from './ConnectionStatus';
 import { CriarLancamento } from './CriarLancamento';
 import { CriarRecorrente } from './CriarRecorrente';
@@ -12,13 +13,14 @@ import { EstatisticasDashboard } from './dashboard/EstatisticasDashboard';
 import { TabelaLancamentos } from './dashboard/TabelaLancamentos';
 import { GerenciarCategorias } from './GerenciarCategorias';
 import { Button } from '@/components/ui/button';
-import { Tag } from 'lucide-react';
+import { Tag, LogOut } from 'lucide-react';
 
 export const Dashboard = () => {
-  const { data: lancamentos, loading: loadingLancamentos, connected } = useFirestore<Lancamento>('lancamentos');
-  const { data: contas } = useFirestore<Conta>('contas');
-  const { data: cartoes } = useFirestore<Cartao>('cartoes');
-  const { data: categorias } = useFirestore<Categoria>('categorias');
+  const { user, signOut } = useAuth();
+  const { data: lancamentos, loading: loadingLancamentos, connected } = useSupabase<Lancamento>('lancamentos');
+  const { data: contas } = useSupabase<Conta>('contas');
+  const { data: cartoes } = useSupabase<Cartao>('cartoes');
+  const { data: categorias } = useSupabase<Categoria>('categorias');
 
   const [filtros, setFiltros] = useState({
     dataInicial: '',
@@ -78,6 +80,10 @@ export const Dashboard = () => {
     });
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   if (loadingLancamentos) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -103,8 +109,17 @@ export const Dashboard = () => {
     <div className="space-y-6">
       {/* Header com status de conexão */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <ConnectionStatus connected={connected} />
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-sm text-gray-600">Bem-vindo, {user?.email}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <ConnectionStatus connected={connected} />
+          <Button variant="outline" onClick={handleSignOut}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
+          </Button>
+        </div>
       </div>
 
       {/* Botões de ação */}
