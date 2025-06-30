@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export function useSupabase<T extends Record<string, any>>(tableName: string) {
+type TableName = 'cartoes' | 'categorias' | 'contas' | 'lancamentos' | 'recorrentes';
+
+export function useSupabase<T extends Record<string, any>>(tableName: TableName) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(true);
@@ -30,7 +32,7 @@ export function useSupabase<T extends Record<string, any>>(tableName: string) {
         return;
       }
 
-      setData(result || []);
+      setData((result || []) as T[]);
       setConnected(true);
     } catch (error) {
       console.error('Erro na conexão:', error);
@@ -49,7 +51,7 @@ export function useSupabase<T extends Record<string, any>>(tableName: string) {
 
     const { data: result, error } = await supabase
       .from(tableName)
-      .insert([{ ...item, user_id: user.id }])
+      .insert([{ ...item, user_id: user.id } as any])
       .select()
       .single();
 
@@ -67,7 +69,7 @@ export function useSupabase<T extends Record<string, any>>(tableName: string) {
 
     const { error } = await supabase
       .from(tableName)
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
       .eq('user_id', user.id);
 

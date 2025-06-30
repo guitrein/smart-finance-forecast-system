@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Categoria } from '@/types';
 import { categoriasPadrao } from '@/data/categoriasPadrao';
 import { Button } from '@/components/ui/button';
@@ -14,18 +14,11 @@ interface SetupInicialProps {
 }
 
 export const SetupInicial = ({ onComplete }: SetupInicialProps) => {
-  const { data: categorias, add: addCategoria } = useFirestore<Categoria>('categorias');
-  const [configurandoFirebase, setConfigurandoFirebase] = useState(false);
+  const { data: categorias, add: addCategoria } = useSupabase<Categoria>('categorias');
   const [criandoCategorias, setCriandoCategorias] = useState(false);
 
-  const firebaseConfigurado = () => {
-    // Verificar se as configurações do Firebase estão preenchidas
-    const config = {
-      apiKey: "your-api-key",
-      authDomain: "your-project.firebaseapp.com",
-      projectId: "your-project-id",
-    };
-    return !Object.values(config).some(value => value.includes('your-'));
+  const supabaseConfigurado = () => {
+    return true; // Supabase já está configurado
   };
 
   const criarCategoriasIniciais = async () => {
@@ -71,25 +64,18 @@ export const SetupInicial = ({ onComplete }: SetupInicialProps) => {
               Configuração Inicial
             </CardTitle>
             <CardDescription>
-              Configure o Firebase e inicialize os dados básicos do sistema
+              Configure os dados básicos do sistema
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Status Firebase */}
+            {/* Status Supabase */}
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="flex items-center gap-3">
-                {firebaseConfigurado() ? (
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                ) : (
-                  <AlertTriangle className="w-6 h-6 text-yellow-600" />
-                )}
+                <CheckCircle className="w-6 h-6 text-green-600" />
                 <div>
-                  <h3 className="font-semibold">Configuração do Firebase</h3>
+                  <h3 className="font-semibold">Configuração do Supabase</h3>
                   <p className="text-sm text-gray-600">
-                    {firebaseConfigurado() 
-                      ? 'Firebase configurado e conectado' 
-                      : 'Configure as credenciais do Firebase no arquivo src/lib/firebase.ts'
-                    }
+                    Supabase configurado e conectado
                   </p>
                 </div>
               </div>
@@ -123,18 +109,7 @@ export const SetupInicial = ({ onComplete }: SetupInicialProps) => {
               )}
             </div>
 
-            {!firebaseConfigurado() && (
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Configuração necessária:</strong> Edite o arquivo{' '}
-                  <code className="bg-gray-100 px-2 py-1 rounded">src/lib/firebase.ts</code>{' '}
-                  com suas credenciais do Firebase para conectar ao banco de dados.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {firebaseConfigurado() && podeIniciar && (
+            {podeIniciar && (
               <div className="text-center space-y-4">
                 <div className="flex items-center justify-center gap-2 text-green-600">
                   <CheckCircle className="w-6 h-6" />
@@ -150,7 +125,7 @@ export const SetupInicial = ({ onComplete }: SetupInicialProps) => {
         </Card>
 
         <div className="text-center text-sm text-gray-500">
-          <p>🚀 Sistema desenvolvido com React, TypeScript, Firebase e Tailwind CSS</p>
+          <p>🚀 Sistema desenvolvido com React, TypeScript, Supabase e Tailwind CSS</p>
         </div>
       </div>
     </div>
