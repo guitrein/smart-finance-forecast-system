@@ -12,6 +12,11 @@ import { TabelaLancamentos } from './dashboard/TabelaLancamentos';
 import { FiltrosDashboard } from './dashboard/FiltrosDashboard';
 import { ProjecoesSupabase } from './ProjecoesSupabase';
 import { ConnectionStatus } from './ConnectionStatus';
+import { CriarLancamento } from './CriarLancamento';
+import { CriarRecorrente } from './CriarRecorrente';
+import { CriarConta } from './CriarConta';
+import { CriarCartao } from './CriarCartao';
+import { CriarCategoria } from './CriarCategoria';
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
 import { 
   PlusCircle, 
@@ -145,6 +150,25 @@ export const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-8">
+            {/* Ações Rápidas */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ações Rápidas</CardTitle>
+                <CardDescription>
+                  Gerencie suas finanças criando lançamentos, contas e categorias
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  <CriarLancamento />
+                  <CriarRecorrente />
+                  <CriarConta />
+                  <CriarCartao />
+                  <CriarCategoria />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Estatísticas */}
             <EstatisticasDashboard 
               receitas={receitas}
