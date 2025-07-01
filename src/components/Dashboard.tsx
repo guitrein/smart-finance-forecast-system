@@ -31,6 +31,7 @@ export const Dashboard = () => {
   const { data: contas, loading: loadingContas } = useSupabase<Conta>('contas');
   const { data: cartoes, loading: loadingCartoes } = useSupabase<Cartao>('cartoes');
 
+  const [setupCompleto, setSetupCompleto] = useState(false);
   const [filtros, setFiltros] = useState({
     categoria: '',
     conta: '',
@@ -41,10 +42,7 @@ export const Dashboard = () => {
   const loading = loadingLancamentos || loadingCategorias || loadingContas || loadingCartoes;
 
   // Verificar se é necessário fazer setup inicial
-  const precisaSetup = !loading && (
-    categorias.length === 0 || 
-    contas.length === 0
-  );
+  const precisaSetup = !loading && !setupCompleto && categorias.length === 0;
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -71,7 +69,8 @@ export const Dashboard = () => {
   }, [lancamentos]);
 
   const handleSetupComplete = () => {
-    window.location.reload();
+    console.log('Setup completado!');
+    setSetupCompleto(true);
   };
 
   if (loading) {

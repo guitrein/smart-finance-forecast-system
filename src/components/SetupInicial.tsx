@@ -45,6 +45,11 @@ export const SetupInicial = ({ onComplete }: SetupInicialProps) => {
 
   const podeIniciar = categorias.length > 0;
 
+  const handleIniciarSistema = () => {
+    console.log('Iniciando sistema...');
+    onComplete();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full space-y-6">
@@ -115,7 +120,7 @@ export const SetupInicial = ({ onComplete }: SetupInicialProps) => {
                   <CheckCircle className="w-6 h-6" />
                   <span className="font-semibold">Sistema pronto para uso!</span>
                 </div>
-                <Button onClick={onComplete} size="lg" className="w-full">
+                <Button onClick={handleIniciarSistema} size="lg" className="w-full">
                   <Rocket className="w-5 h-5 mr-2" />
                   Iniciar Sistema
                 </Button>
