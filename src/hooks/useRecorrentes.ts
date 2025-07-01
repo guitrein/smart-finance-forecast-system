@@ -32,8 +32,8 @@ export const useRecorrentes = () => {
     try {
       const recorrenteId = await recorrentesHook.add(recorrente);
       
-      const ehCartao = isCartao(recorrente.contaVinculada, cartoes);
-      const cartao = ehCartao ? getCartaoById(recorrente.contaVinculada, cartoes) : null;
+      const ehCartao = isCartao(recorrente.conta_id, cartoes);
+      const cartao = ehCartao ? getCartaoById(recorrente.conta_id, cartoes) : null;
       
       const numParcelas = recorrente.parcelas || 12;
       const lancamentosParaGerar = Math.min(numParcelas, 6);
@@ -48,10 +48,11 @@ export const useRecorrentes = () => {
         const novoLancamento = {
           data: dataLancamento,
           descricao: `${recorrente.descricao} (${i + 1}/${numParcelas})`,
-          categoria: recorrente.categoria,
+          categoria_id: recorrente.categoria_id,
           tipo: recorrente.tipo,
           valor: recorrente.valor,
-          contaVinculada: recorrente.contaVinculada,
+          conta_id: ehCartao ? null : recorrente.conta_id,
+          cartao_id: ehCartao ? recorrente.conta_id : null,
           recorrente: true,
           recorrenteId: recorrenteId,
           parcelado: recorrente.parcelas ? true : false,

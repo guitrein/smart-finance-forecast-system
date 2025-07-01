@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
@@ -55,10 +56,11 @@ export const CriarLancamento = () => {
       const novoLancamento = {
         data: dataFinal,
         descricao: formData.descricao,
-        categoria: formData.categoria,
+        categoria_id: formData.categoria,
         tipo: formData.tipo,
         valor: parseFloat(formData.valor),
-        contaVinculada: formData.contaVinculada,
+        conta_id: ehCartao ? null : formData.contaVinculada,
+        cartao_id: ehCartao ? formData.contaVinculada : null,
         recorrente: formData.recorrente,
         parcelado: formData.parcelado,
         ...(formData.parcelado && {

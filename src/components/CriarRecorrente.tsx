@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useRecorrentes } from '@/hooks/useRecorrentes';
 import { useSupabase } from '@/hooks/useSupabase';
@@ -35,10 +34,10 @@ export const CriarRecorrente = () => {
       const novoRecorrente = {
         dataInicial: formData.dataInicial,
         descricao: formData.descricao,
-        categoria: formData.categoria,
+        categoria_id: formData.categoria,
         tipo: formData.tipo,
         valor: parseFloat(formData.valor),
-        contaVinculada: formData.contaVinculada,
+        conta_id: formData.contaVinculada,
         frequencia: formData.frequencia,
         parcelas: formData.parcelas ? parseInt(formData.parcelas) : null,
         parcelasGeradas: 0

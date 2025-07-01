@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Lancamento, Cartao, Conta, FaturaCartao, Vencimento, FluxoCaixaMensal } from '@/types';
@@ -41,7 +40,10 @@ export const ProjecoesCartoes = () => {
   // Filtrar dados baseado na seleção
   const dadosFiltrados = useMemo(() => {
     const contasECartoesSelecionados = [...contasSelecionadas, ...cartoesSelecionados];
-    return lancamentos.filter(l => contasECartoesSelecionados.includes(l.contaVinculada));
+    return lancamentos.filter(l => {
+      const contaId = l.conta_id || l.cartao_id;
+      return contaId && contasECartoesSelecionados.includes(contaId);
+    });
   }, [lancamentos, contasSelecionadas, cartoesSelecionados]);
 
   const cartoesFiltrados = useMemo(() => {
@@ -51,7 +53,7 @@ export const ProjecoesCartoes = () => {
   // Calcular faturas dos cartões filtrados
   const faturasCartoes = useMemo((): FaturaCartao[] => {
     return cartoesFiltrados.map(cartao => {
-      const lancamentosCartao = dadosFiltrados.filter(l => l.contaVinculada === cartao.id && l.tipo === 'despesa');
+      const lancamentosCartao = dadosFiltrados.filter(l => l.cartao_id === cartao.id && l.tipo === 'despesa');
       const usado = lancamentosCartao.reduce((total, l) => total + l.valor, 0);
       const disponivel = cartao.limite - usado;
       const percentualUsado = (usado / cartao.limite) * 100;

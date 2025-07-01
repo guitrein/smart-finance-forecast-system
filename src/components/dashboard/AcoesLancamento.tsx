@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -40,16 +39,16 @@ interface AcoesLancamentoProps {
 }
 
 export const AcoesLancamento = ({ lancamento, categorias, contas, cartoes }: AcoesLancamentoProps) => {
-  const { update, remove } = useFirestore<Lancamento>('lancamentos');
+  const { update, remove } = useSupabase<Lancamento>('lancamentos');
   const [editarAberto, setEditarAberto] = useState(false);
   const [excluirAberto, setExcluirAberto] = useState(false);
   const [formData, setFormData] = useState({
     data: lancamento.data,
     descricao: lancamento.descricao,
-    categoria: lancamento.categoria,
+    categoria: lancamento.categoria_id || '',
     tipo: lancamento.tipo,
     valor: lancamento.valor,
-    contaVinculada: lancamento.contaVinculada
+    contaVinculada: lancamento.conta_id || lancamento.cartao_id || ''
   });
 
   const todasContas = [...contas, ...cartoes];
@@ -71,9 +70,13 @@ export const AcoesLancamento = ({ lancamento, categorias, contas, cartoes }: Aco
       }
 
       await update(lancamento.id, {
-        ...formData,
         data: dataFinal,
-        valor: Number(formData.valor)
+        descricao: formData.descricao,
+        categoria_id: formData.categoria,
+        tipo: formData.tipo,
+        valor: Number(formData.valor),
+        conta_id: ehCartao ? null : formData.contaVinculada,
+        cartao_id: ehCartao ? formData.contaVinculada : null,
       });
 
       setEditarAberto(false);
