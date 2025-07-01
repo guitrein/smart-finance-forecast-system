@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ import {
 
 export const Dashboard = () => {
   const { signOut } = useAuth();
-  const { data: lancamentos, loading: loadingLancamentos } = useSupabase<Lancamento>('lancamentos');
+  const { data: lancamentos, loading: loadingLancamentos, connected } = useSupabase<Lancamento>('lancamentos');
   const { data: categorias, loading: loadingCategorias } = useSupabase<Categoria>('categorias');
   const { data: contas, loading: loadingContas } = useSupabase<Conta>('contas');
   const { data: cartoes, loading: loadingCartoes } = useSupabase<Cartao>('cartoes');
@@ -34,9 +34,8 @@ export const Dashboard = () => {
   const [filtros, setFiltros] = useState({
     categoria: '',
     conta: '',
-    tipo: '',
-    dataInicio: '',
-    dataFim: ''
+    dataInicial: '',
+    dataFinal: ''
   });
 
   const loading = loadingLancamentos || loadingCategorias || loadingContas || loadingCartoes;
@@ -46,6 +45,34 @@ export const Dashboard = () => {
     categorias.length === 0 || 
     contas.length === 0
   );
+
+  const formatarMoeda = (valor: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor);
+  };
+
+  // Calcular estatísticas
+  const { receitas, despesas, saldo } = useMemo(() => {
+    const receitasTotal = lancamentos
+      .filter(l => l.tipo === 'receita')
+      .reduce((total, l) => total + l.valor, 0);
+    
+    const despesasTotal = lancamentos
+      .filter(l => l.tipo === 'despesa')
+      .reduce((total, l) => total + l.valor, 0);
+    
+    return {
+      receitas: receitasTotal,
+      despesas: despesasTotal,
+      saldo: receitasTotal - despesasTotal
+    };
+  }, [lancamentos]);
+
+  const handleSetupComplete = () => {
+    window.location.reload();
+  };
 
   if (loading) {
     return (
@@ -59,7 +86,7 @@ export const Dashboard = () => {
   }
 
   if (precisaSetup) {
-    return <SetupInicial />;
+    return <SetupInicial onComplete={handleSetupComplete} />;
   }
 
   const handleLogout = async () => {
@@ -70,9 +97,18 @@ export const Dashboard = () => {
     }
   };
 
+  const limparFiltros = () => {
+    setFiltros({
+      categoria: '',
+      conta: '',
+      dataInicial: '',
+      dataFinal: ''
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <ConnectionStatus />
+      <ConnectionStatus connected={connected} />
       
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
@@ -112,9 +148,10 @@ export const Dashboard = () => {
           <TabsContent value="dashboard" className="space-y-8">
             {/* Estatísticas */}
             <EstatisticasDashboard 
-              lancamentos={lancamentos}
-              contas={contas}
-              cartoes={cartoes}
+              receitas={receitas}
+              despesas={despesas}
+              saldo={saldo}
+              formatarMoeda={formatarMoeda}
             />
 
             {/* Filtros */}
@@ -123,7 +160,8 @@ export const Dashboard = () => {
               contas={contas}
               cartoes={cartoes}
               filtros={filtros}
-              onFiltrosChange={setFiltros}
+              setFiltros={setFiltros}
+              onLimparFiltros={limparFiltros}
             />
 
             {/* Tabela de Lançamentos */}
@@ -132,7 +170,7 @@ export const Dashboard = () => {
               categorias={categorias}
               contas={contas}
               cartoes={cartoes}
-              filtros={filtros}
+              formatarMoeda={formatarMoeda}
             />
           </TabsContent>
 

@@ -3,10 +3,11 @@ export interface Lancamento {
   id: string;
   data: string;
   descricao: string;
-  categoria: string;
+  categoria_id: string | null;
   tipo: 'receita' | 'despesa';
   valor: number;
-  contaVinculada: string;
+  conta_id: string | null;
+  cartao_id: string | null;
   recorrente: boolean;
   recorrenteId?: string;
   parcelado: boolean;
@@ -21,10 +22,10 @@ export interface Recorrente {
   id: string;
   dataInicial: string;
   descricao: string;
-  categoria: string;
+  categoria_id: string | null;
   tipo: 'receita' | 'despesa';
   valor: number;
-  contaVinculada: string;
+  conta_id: string | null;
   frequencia: 'mensal' | 'bimestral' | 'trimestral' | 'semestral' | 'anual';
   parcelas?: number | null;
   parcelasGeradas: number;

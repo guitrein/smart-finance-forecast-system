@@ -48,7 +48,7 @@ export const TabelaLancamentos = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {lancamentos.slice(0, 10).map((lancamento) => {
-              const categoria = categorias.find(c => c.id === lancamento.categoria);
+              const categoria = categorias.find(c => c.id === lancamento.categoria_id);
               return (
                 <tr key={lancamento.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
