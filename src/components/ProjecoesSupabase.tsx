@@ -72,8 +72,8 @@ export const ProjecoesSupabase = () => {
       return {
         cartaoId: cartao.id,
         nome: cartao.nome,
-        bandeira: cartao.nome, // Usando nome como bandeira por enquanto
-        diaVencimento: cartao.vencimento || 10,
+        bandeira: cartao.bandeira || cartao.nome,
+        diaVencimento: cartao.diavencimento || 10,
         limite: cartao.limite,
         usado,
         disponivel,
@@ -94,7 +94,7 @@ export const ProjecoesSupabase = () => {
 
     // Vencimentos de faturas de cartões filtrados
     cartoesFiltrados.forEach(cartao => {
-      const proximoVencimento = new Date(hoje.getFullYear(), hoje.getMonth(), cartao.vencimento || 10);
+      const proximoVencimento = new Date(hoje.getFullYear(), hoje.getMonth(), cartao.diavencimento || 10);
       if (proximoVencimento < hoje) {
         proximoVencimento.setMonth(proximoVencimento.getMonth() + 1);
       }
