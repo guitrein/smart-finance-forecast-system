@@ -38,7 +38,7 @@ export interface Conta {
   nome: string;
   banco?: string;
   categoria?: string;
-  saldoInicial?: number;
+  saldoinicial?: number;
   saldo?: number;
   tipo?: string;
   created_at: string;
@@ -50,8 +50,7 @@ export interface Cartao {
   nome: string;
   bandeira?: string;
   limite: number;
-  diaVencimento?: number;
-  vencimento?: number;
+  diavencimento?: number;
   tipo?: string;
   created_at: string;
   user_id: string;

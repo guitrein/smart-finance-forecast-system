@@ -17,7 +17,7 @@ export const CriarCartao = () => {
     nome: '',
     bandeira: '',
     limite: '',
-    diaVencimento: '',
+    diavencimento: '',
     tipo: 'cartao'
   });
 
@@ -29,7 +29,7 @@ export const CriarCartao = () => {
         nome: formData.nome,
         bandeira: formData.bandeira,
         limite: parseFloat(formData.limite) || 0,
-        diaVencimento: parseInt(formData.diaVencimento),
+        diavencimento: parseInt(formData.diavencimento),
         tipo: formData.tipo
       };
 
@@ -39,7 +39,7 @@ export const CriarCartao = () => {
         nome: '',
         bandeira: '',
         limite: '',
-        diaVencimento: '',
+        diavencimento: '',
         tipo: 'cartao'
       });
       
@@ -103,14 +103,14 @@ export const CriarCartao = () => {
           </div>
 
           <div>
-            <Label htmlFor="diaVencimento">Dia do Vencimento</Label>
+            <Label htmlFor="diavencimento">Dia do Vencimento</Label>
             <Input
-              id="diaVencimento"
+              id="diavencimento"
               type="number"
               min="1"
               max="31"
-              value={formData.diaVencimento}
-              onChange={(e) => setFormData(prev => ({ ...prev, diaVencimento: e.target.value }))}
+              value={formData.diavencimento}
+              onChange={(e) => setFormData(prev => ({ ...prev, diavencimento: e.target.value }))}
               placeholder="Ex: 15"
               required
             />

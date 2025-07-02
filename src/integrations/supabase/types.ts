@@ -11,28 +11,34 @@ export type Database = {
     Tables: {
       cartoes: {
         Row: {
+          bandeira: string | null
           created_at: string
+          diavencimento: number | null
           id: string
           limite: number
           nome: string
+          tipo: string | null
           user_id: string
-          vencimento: number
         }
         Insert: {
+          bandeira?: string | null
           created_at?: string
+          diavencimento?: number | null
           id?: string
           limite: number
           nome: string
+          tipo?: string | null
           user_id: string
-          vencimento: number
         }
         Update: {
+          bandeira?: string | null
           created_at?: string
+          diavencimento?: number | null
           id?: string
           limite?: number
           nome?: string
+          tipo?: string | null
           user_id?: string
-          vencimento?: number
         }
         Relationships: []
       }
@@ -68,24 +74,36 @@ export type Database = {
       }
       contas: {
         Row: {
+          banco: string | null
+          categoria: string | null
           created_at: string
           id: string
           nome: string
           saldo: number | null
+          saldoinicial: number | null
+          tipo: string | null
           user_id: string
         }
         Insert: {
+          banco?: string | null
+          categoria?: string | null
           created_at?: string
           id?: string
           nome: string
           saldo?: number | null
+          saldoinicial?: number | null
+          tipo?: string | null
           user_id: string
         }
         Update: {
+          banco?: string | null
+          categoria?: string | null
           created_at?: string
           id?: string
           nome?: string
           saldo?: number | null
+          saldoinicial?: number | null
+          tipo?: string | null
           user_id?: string
         }
         Relationships: []

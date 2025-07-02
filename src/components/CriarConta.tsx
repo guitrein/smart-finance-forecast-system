@@ -17,7 +17,7 @@ export const CriarConta = () => {
     nome: '',
     banco: '',
     categoria: 'corrente',
-    saldoInicial: '',
+    saldoinicial: '',
     tipo: 'conta'
   });
 
@@ -29,7 +29,7 @@ export const CriarConta = () => {
         nome: formData.nome,
         banco: formData.banco,
         categoria: formData.categoria,
-        saldoInicial: parseFloat(formData.saldoInicial) || 0,
+        saldoinicial: parseFloat(formData.saldoinicial) || 0,
         tipo: formData.tipo
       };
 
@@ -39,7 +39,7 @@ export const CriarConta = () => {
         nome: '',
         banco: '',
         categoria: 'corrente',
-        saldoInicial: '',
+        saldoinicial: '',
         tipo: 'conta'
       });
       
@@ -100,13 +100,13 @@ export const CriarConta = () => {
           </div>
 
           <div>
-            <Label htmlFor="saldoInicial">Saldo Inicial</Label>
+            <Label htmlFor="saldoinicial">Saldo Inicial</Label>
             <Input
-              id="saldoInicial"
+              id="saldoinicial"
               type="number"
               step="0.01"
-              value={formData.saldoInicial}
-              onChange={(e) => setFormData(prev => ({ ...prev, saldoInicial: e.target.value }))}
+              value={formData.saldoinicial}
+              onChange={(e) => setFormData(prev => ({ ...prev, saldoinicial: e.target.value }))}
               placeholder="0.00"
             />
           </div>
