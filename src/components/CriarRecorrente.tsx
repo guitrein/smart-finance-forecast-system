@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useRecorrentes } from '@/hooks/useRecorrentes';
 import { useSupabase } from '@/hooks/useSupabase';
 import { Categoria, Conta, Cartao } from '@/types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,7 +32,7 @@ export const CriarRecorrente = () => {
     
     try {
       const novoRecorrente = {
-        dataInicial: formData.dataInicial,
+        datainicial: formData.dataInicial,
         descricao: formData.descricao,
         categoria_id: formData.categoria,
         tipo: formData.tipo,
@@ -40,7 +40,9 @@ export const CriarRecorrente = () => {
         conta_id: formData.contaVinculada,
         frequencia: formData.frequencia,
         parcelas: formData.parcelas ? parseInt(formData.parcelas) : null,
-        parcelasGeradas: 0
+        parcelasgeradas: 0,
+        dia_vencimento: null,
+        ativo: true
       };
 
       await gerarLancamentosRecorrentes(novoRecorrente);
@@ -75,6 +77,9 @@ export const CriarRecorrente = () => {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Criar Lançamento Recorrente</DialogTitle>
+          <DialogDescription>
+            Configure um lançamento que se repete automaticamente
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

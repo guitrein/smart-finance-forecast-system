@@ -39,10 +39,10 @@ export const useRecorrentes = () => {
       const lancamentosParaGerar = Math.min(numParcelas, 6);
       
       for (let i = 0; i < lancamentosParaGerar; i++) {
-        let dataLancamento = calcularProximaData(recorrente.dataInicial, recorrente.frequencia, i);
+        let dataLancamento = calcularProximaData(recorrente.datainicial || new Date().toISOString().split('T')[0], recorrente.frequencia, i);
         
         if (ehCartao && cartao) {
-          dataLancamento = calcularDataVencimentoCartao(dataLancamento, cartao.diaVencimento);
+          dataLancamento = calcularDataVencimentoCartao(dataLancamento, cartao.diavencimento || 10);
         }
         
         const novoLancamento = {
@@ -65,7 +65,7 @@ export const useRecorrentes = () => {
       }
       
       await recorrentesHook.update(recorrenteId, {
-        parcelasGeradas: lancamentosParaGerar
+        parcelasgeradas: lancamentosParaGerar
       });
       
       return recorrenteId;

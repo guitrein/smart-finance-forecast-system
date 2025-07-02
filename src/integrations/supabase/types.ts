@@ -175,10 +175,13 @@ export type Database = {
           categoria_id: string | null
           conta_id: string | null
           created_at: string
+          datainicial: string | null
           descricao: string
           dia_vencimento: number | null
           frequencia: string
           id: string
+          parcelas: number | null
+          parcelasgeradas: number | null
           tipo: string
           user_id: string
           valor: number
@@ -188,10 +191,13 @@ export type Database = {
           categoria_id?: string | null
           conta_id?: string | null
           created_at?: string
+          datainicial?: string | null
           descricao: string
           dia_vencimento?: number | null
           frequencia: string
           id?: string
+          parcelas?: number | null
+          parcelasgeradas?: number | null
           tipo: string
           user_id: string
           valor: number
@@ -201,10 +207,13 @@ export type Database = {
           categoria_id?: string | null
           conta_id?: string | null
           created_at?: string
+          datainicial?: string | null
           descricao?: string
           dia_vencimento?: number | null
           frequencia?: string
           id?: string
+          parcelas?: number | null
+          parcelasgeradas?: number | null
           tipo?: string
           user_id?: string
           valor?: number

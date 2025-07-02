@@ -1,4 +1,3 @@
-
 export interface Lancamento {
   id: string;
   data: string;
@@ -20,7 +19,7 @@ export interface Lancamento {
 
 export interface Recorrente {
   id: string;
-  dataInicial: string;
+  datainicial: string | null;
   descricao: string;
   categoria_id: string | null;
   tipo: 'receita' | 'despesa';
@@ -28,7 +27,9 @@ export interface Recorrente {
   conta_id: string | null;
   frequencia: 'mensal' | 'bimestral' | 'trimestral' | 'semestral' | 'anual';
   parcelas?: number | null;
-  parcelasGeradas: number;
+  parcelasgeradas: number | null;
+  dia_vencimento?: number | null;
+  ativo?: boolean | null;
   created_at: string;
   user_id: string;
 }
