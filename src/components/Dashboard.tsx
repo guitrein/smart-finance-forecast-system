@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,11 +37,17 @@ export const Dashboard = () => {
   const { data: cartoes, loading: loadingCartoes } = useSupabase<Cartao>('cartoes');
 
   const [setupCompleto, setSetupCompleto] = useState(false);
+  
+  // Definir filtro padrão: data atual até 30 dias no passado
+  const hoje = new Date();
+  const trintaDiasAtras = new Date();
+  trintaDiasAtras.setDate(hoje.getDate() - 30);
+  
   const [filtros, setFiltros] = useState({
     categoria: '',
     conta: '',
-    dataInicial: '',
-    dataFinal: ''
+    dataInicial: trintaDiasAtras.toISOString().split('T')[0],
+    dataFinal: hoje.toISOString().split('T')[0]
   });
 
   const loading = loadingLancamentos || loadingCategorias || loadingContas || loadingCartoes;
@@ -49,20 +55,46 @@ export const Dashboard = () => {
   // Verificar se é necessário fazer setup inicial
   const precisaSetup = !loading && !setupCompleto && categorias.length === 0;
 
-  const formatarMoeda = (valor: number) => {
+  const formatarMoeda = useCallback((valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(valor);
-  };
+  }, []);
 
-  // Calcular estatísticas
+  // Filtrar lançamentos baseado nos filtros aplicados
+  const lancamentosFiltrados = useMemo(() => {
+    return lancamentos.filter(lancamento => {
+      // Filtro de data
+      const dataLancamento = new Date(lancamento.data);
+      const dataInicial = filtros.dataInicial ? new Date(filtros.dataInicial) : null;
+      const dataFinal = filtros.dataFinal ? new Date(filtros.dataFinal) : null;
+      
+      if (dataInicial && dataLancamento < dataInicial) return false;
+      if (dataFinal && dataLancamento > dataFinal) return false;
+      
+      // Filtro de categoria
+      if (filtros.categoria && filtros.categoria !== 'todas' && lancamento.categoria_id !== filtros.categoria) {
+        return false;
+      }
+      
+      // Filtro de conta/cartão
+      if (filtros.conta && filtros.conta !== 'todas') {
+        const contaId = lancamento.conta_id || lancamento.cartao_id;
+        if (contaId !== filtros.conta) return false;
+      }
+      
+      return true;
+    });
+  }, [lancamentos, filtros]);
+
+  // Calcular estatísticas com dados filtrados
   const { receitas, despesas, saldo } = useMemo(() => {
-    const receitasTotal = lancamentos
+    const receitasTotal = lancamentosFiltrados
       .filter(l => l.tipo === 'receita')
       .reduce((total, l) => total + l.valor, 0);
     
-    const despesasTotal = lancamentos
+    const despesasTotal = lancamentosFiltrados
       .filter(l => l.tipo === 'despesa')
       .reduce((total, l) => total + l.valor, 0);
     
@@ -71,12 +103,33 @@ export const Dashboard = () => {
       despesas: despesasTotal,
       saldo: receitasTotal - despesasTotal
     };
-  }, [lancamentos]);
+  }, [lancamentosFiltrados]);
 
-  const handleSetupComplete = () => {
+  const handleSetupComplete = useCallback(() => {
     console.log('Setup completado!');
     setSetupCompleto(true);
-  };
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+  }, [signOut]);
+
+  const limparFiltros = useCallback(() => {
+    const hoje = new Date();
+    const trintaDiasAtras = new Date();
+    trintaDiasAtras.setDate(hoje.getDate() - 30);
+    
+    setFiltros({
+      categoria: '',
+      conta: '',
+      dataInicial: trintaDiasAtras.toISOString().split('T')[0],
+      dataFinal: hoje.toISOString().split('T')[0]
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -92,23 +145,6 @@ export const Dashboard = () => {
   if (precisaSetup) {
     return <SetupInicial onComplete={handleSetupComplete} />;
   }
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-    }
-  };
-
-  const limparFiltros = () => {
-    setFiltros({
-      categoria: '',
-      conta: '',
-      dataInicial: '',
-      dataFinal: ''
-    });
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -169,14 +205,6 @@ export const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Estatísticas */}
-            <EstatisticasDashboard 
-              receitas={receitas}
-              despesas={despesas}
-              saldo={saldo}
-              formatarMoeda={formatarMoeda}
-            />
-
             {/* Filtros */}
             <FiltrosDashboard
               categorias={categorias}
@@ -187,9 +215,17 @@ export const Dashboard = () => {
               onLimparFiltros={limparFiltros}
             />
 
+            {/* Estatísticas */}
+            <EstatisticasDashboard 
+              receitas={receitas}
+              despesas={despesas}
+              saldo={saldo}
+              formatarMoeda={formatarMoeda}
+            />
+
             {/* Tabela de Lançamentos */}
             <TabelaLancamentos
-              lancamentos={lancamentos}
+              lancamentos={lancamentosFiltrados}
               categorias={categorias}
               contas={contas}
               cartoes={cartoes}
