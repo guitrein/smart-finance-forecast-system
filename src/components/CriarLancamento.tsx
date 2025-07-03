@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -49,7 +49,7 @@ export const CriarLancamento = () => {
       if (ehCartao) {
         const cartao = getCartaoById(formData.contaVinculada, cartoes);
         if (cartao) {
-          dataFinal = calcularDataVencimentoCartao(formData.data, cartao.diaVencimento);
+          dataFinal = calcularDataVencimentoCartao(formData.data, cartao.diavencimento);
         }
       }
 
@@ -64,9 +64,9 @@ export const CriarLancamento = () => {
         recorrente: formData.recorrente,
         parcelado: formData.parcelado,
         ...(formData.parcelado && {
-          numeroParcelas: parseInt(formData.numeroParcelas),
-          parcelaAtual: 1,
-          grupoParcelamento: `${Date.now()}`
+          numeroparcelas: parseInt(formData.numeroParcelas),
+          parcelaatual: 1,
+          grupoparcelamento: `${Date.now()}`
         })
       };
 
@@ -110,6 +110,9 @@ export const CriarLancamento = () => {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Criar Lançamento</DialogTitle>
+          <DialogDescription>
+            Adicione um novo lançamento ao seu controle financeiro
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

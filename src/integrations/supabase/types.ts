@@ -116,7 +116,13 @@ export type Database = {
           created_at: string
           data: string
           descricao: string
+          grupoparcelamento: string | null
           id: string
+          numeroparcelas: number | null
+          parcelaatual: number | null
+          parcelado: boolean | null
+          recorrente: boolean | null
+          recorrenteid: string | null
           tipo: string
           user_id: string
           valor: number
@@ -128,7 +134,13 @@ export type Database = {
           created_at?: string
           data: string
           descricao: string
+          grupoparcelamento?: string | null
           id?: string
+          numeroparcelas?: number | null
+          parcelaatual?: number | null
+          parcelado?: boolean | null
+          recorrente?: boolean | null
+          recorrenteid?: string | null
           tipo: string
           user_id: string
           valor: number
@@ -140,7 +152,13 @@ export type Database = {
           created_at?: string
           data?: string
           descricao?: string
+          grupoparcelamento?: string | null
           id?: string
+          numeroparcelas?: number | null
+          parcelaatual?: number | null
+          parcelado?: boolean | null
+          recorrente?: boolean | null
+          recorrenteid?: string | null
           tipo?: string
           user_id?: string
           valor?: number

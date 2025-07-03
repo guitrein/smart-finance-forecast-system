@@ -58,7 +58,7 @@ export const TabelaLancamentos = ({
                     {lancamento.descricao}
                     {lancamento.parcelado && (
                       <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                        {lancamento.parcelaAtual}/{lancamento.numeroParcelas}
+                        {lancamento.parcelaatual}/{lancamento.numeroparcelas}
                       </span>
                     )}
                   </td>

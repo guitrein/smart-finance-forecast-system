@@ -8,11 +8,11 @@ export interface Lancamento {
   conta_id: string | null;
   cartao_id: string | null;
   recorrente: boolean;
-  recorrenteId?: string;
+  recorrenteid?: string;
   parcelado: boolean;
-  numeroParcelas?: number;
-  parcelaAtual?: number;
-  grupoParcelamento?: string;
+  numeroparcelas?: number;
+  parcelaatual?: number;
+  grupoparcelamento?: string;
   created_at: string;
   user_id: string;
 }

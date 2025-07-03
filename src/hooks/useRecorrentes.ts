@@ -54,11 +54,11 @@ export const useRecorrentes = () => {
           conta_id: ehCartao ? null : recorrente.conta_id,
           cartao_id: ehCartao ? recorrente.conta_id : null,
           recorrente: true,
-          recorrenteId: recorrenteId,
+          recorrenteid: recorrenteId,
           parcelado: recorrente.parcelas ? true : false,
-          numeroParcelas: recorrente.parcelas || undefined,
-          parcelaAtual: recorrente.parcelas ? i + 1 : undefined,
-          grupoParcelamento: recorrenteId
+          numeroparcelas: recorrente.parcelas || undefined,
+          parcelaatual: recorrente.parcelas ? i + 1 : undefined,
+          grupoparcelamento: recorrenteId
         };
         
         await lancamentosHook.add(novoLancamento);
