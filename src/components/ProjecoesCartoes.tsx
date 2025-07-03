@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Lancamento, Cartao, Conta, FaturaCartao, Vencimento, FluxoCaixaMensal } from '@/types';
@@ -131,7 +132,7 @@ export const ProjecoesCartoes = () => {
 
         vencimentos.push({
           data: lancamento.data,
-          titulo: `${lancamento.descricao} (${lancamento.parcelaAtual}/${lancamento.numeroParcelas})`,
+          titulo: `${lancamento.descricao} (${lancamento.parcelaatual}/${lancamento.numeroparcelas})`,
           valor: lancamento.valor,
           status,
           tipo: 'parcela'
