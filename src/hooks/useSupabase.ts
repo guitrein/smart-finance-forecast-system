@@ -67,6 +67,8 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
   const update = async (id: string, updates: Partial<T>) => {
     if (!user) return;
 
+    console.log(`Atualizando ${tableName} com id:`, id, 'dados:', updates);
+
     // Remover filtro por user_id na atualização para permitir editar qualquer registro
     const { error } = await supabase
       .from(tableName)
@@ -82,20 +84,31 @@ export function useSupabase<T extends Record<string, any>>(tableName: TableName)
   };
 
   const remove = async (id: string) => {
-    if (!user) return;
-
-    // Remover filtro por user_id na exclusão para permitir deletar qualquer registro
-    const { error } = await supabase
-      .from(tableName)
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Erro ao remover:', error);
-      throw error;
+    if (!user) {
+      console.error('Usuário não autenticado para remoção');
+      return;
     }
 
-    await fetchData();
+    console.log(`Removendo ${tableName} com id:`, id);
+
+    try {
+      // Remover filtro por user_id na exclusão para permitir deletar qualquer registro
+      const { error } = await supabase
+        .from(tableName)
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao remover no Supabase:', error);
+        throw error;
+      }
+
+      console.log(`${tableName} removido com sucesso`);
+      await fetchData();
+    } catch (error) {
+      console.error('Erro na função remove:', error);
+      throw error;
+    }
   };
 
   return {

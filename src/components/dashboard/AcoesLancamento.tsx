@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
 import { useSupabase } from '@/hooks/useSupabase';
@@ -42,6 +43,7 @@ export const AcoesLancamento = ({ lancamento, categorias, contas, cartoes }: Aco
   const { update, remove } = useSupabase<Lancamento>('lancamentos');
   const [editarAberto, setEditarAberto] = useState(false);
   const [excluirAberto, setExcluirAberto] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
   const [formData, setFormData] = useState({
     data: lancamento.data,
     descricao: lancamento.descricao,
@@ -65,7 +67,7 @@ export const AcoesLancamento = ({ lancamento, categorias, contas, cartoes }: Aco
       if (ehCartao) {
         const cartao = getCartaoById(formData.contaVinculada, cartoes);
         if (cartao) {
-          dataFinal = calcularDataVencimentoCartao(formData.data, cartao.diaVencimento);
+          dataFinal = calcularDataVencimentoCartao(formData.data, cartao.diavencimento);
         }
       }
 
@@ -81,23 +83,47 @@ export const AcoesLancamento = ({ lancamento, categorias, contas, cartoes }: Aco
 
       setEditarAberto(false);
       
-      if (ehCartao) {
-        toast({
-          title: "Lançamento atualizado!",
-          description: `Data ajustada para vencimento do cartão: ${new Date(dataFinal).toLocaleDateString('pt-BR')}`,
-        });
-      }
+      toast({
+        title: "Lançamento atualizado!",
+        description: ehCartao 
+          ? `Data ajustada para vencimento do cartão: ${new Date(dataFinal).toLocaleDateString('pt-BR')}`
+          : "Lançamento atualizado com sucesso",
+      });
     } catch (error) {
       console.error('Erro ao editar lançamento:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar lançamento",
+        variant: "destructive"
+      });
     }
   };
 
   const handleExcluir = async () => {
+    if (excluindo) return;
+    
     try {
+      setExcluindo(true);
+      console.log('Tentando excluir lançamento:', lancamento.id);
+      
       await remove(lancamento.id);
+      
+      console.log('Lançamento excluído com sucesso');
       setExcluirAberto(false);
+      
+      toast({
+        title: "Lançamento excluído!",
+        description: "O lançamento foi excluído com sucesso",
+      });
     } catch (error) {
       console.error('Erro ao excluir lançamento:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir lançamento",
+        variant: "destructive"
+      });
+    } finally {
+      setExcluindo(false);
     }
   };
 
@@ -242,9 +268,15 @@ export const AcoesLancamento = ({ lancamento, categorias, contas, cartoes }: Aco
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleExcluir} className="bg-red-600 hover:bg-red-700">
-              Excluir
+            <AlertDialogCancel disabled={excluindo}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleExcluir} 
+              className="bg-red-600 hover:bg-red-700"
+              disabled={excluindo}
+            >
+              {excluindo ? 'Excluindo...' : 'Excluir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
