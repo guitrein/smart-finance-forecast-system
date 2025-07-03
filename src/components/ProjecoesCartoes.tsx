@@ -1,6 +1,5 @@
-
 import { useState, useMemo } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Lancamento, Cartao, Conta, FaturaCartao, Vencimento, FluxoCaixaMensal } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -9,9 +8,9 @@ import { FiltrosProjecoes } from './projecoes/FiltrosProjecoes';
 import { CreditCard, Calendar, TrendingUp } from 'lucide-react';
 
 export const ProjecoesCartoes = () => {
-  const { data: lancamentos } = useFirestore<Lancamento>('lancamentos');
-  const { data: cartoes } = useFirestore<Cartao>('cartoes');
-  const { data: contas } = useFirestore<Conta>('contas');
+  const { data: lancamentos } = useSupabase<Lancamento>('lancamentos');
+  const { data: cartoes } = useSupabase<Cartao>('cartoes');
+  const { data: contas } = useSupabase<Conta>('contas');
 
   const [contasSelecionadas, setContasSelecionadas] = useState<string[]>([]);
   const [cartoesSelecionados, setCartoesSelecionados] = useState<string[]>([]);
