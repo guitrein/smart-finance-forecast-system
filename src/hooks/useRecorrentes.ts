@@ -28,12 +28,16 @@ export const useRecorrentes = () => {
     }
   };
 
-  const gerarLancamentosRecorrentes = async (recorrente: Omit<Recorrente, 'id' | 'created_at' | 'user_id'>) => {
+  const gerarLancamentosRecorrentes = async (
+    recorrente: Omit<Recorrente, 'id' | 'created_at' | 'user_id'>, 
+    cartaoId?: string | null
+  ) => {
     try {
       const recorrenteId = await recorrentesHook.add(recorrente);
       
-      const ehCartao = isCartao(recorrente.conta_id, cartoes);
-      const cartao = ehCartao ? getCartaoById(recorrente.conta_id, cartoes) : null;
+      // Determinar se é cartão baseado no parâmetro cartaoId
+      const ehCartao = !!cartaoId;
+      const cartao = ehCartao ? getCartaoById(cartaoId, cartoes) : null;
       
       const numParcelas = recorrente.parcelas || 12;
       const lancamentosParaGerar = Math.min(numParcelas, 6);
@@ -52,7 +56,7 @@ export const useRecorrentes = () => {
           tipo: recorrente.tipo,
           valor: recorrente.valor,
           conta_id: ehCartao ? null : recorrente.conta_id,
-          cartao_id: ehCartao ? recorrente.conta_id : null,
+          cartao_id: ehCartao ? cartaoId : null,
           recorrente: true,
           recorrenteid: recorrenteId,
           parcelado: recorrente.parcelas ? true : false,

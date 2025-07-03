@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useRecorrentes } from '@/hooks/useRecorrentes';
 import { useSupabase } from '@/hooks/useSupabase';
@@ -23,6 +24,7 @@ export const CriarRecorrente = () => {
     tipo: 'despesa' as 'receita' | 'despesa',
     valor: '',
     contaVinculada: '',
+    tipoContaVinculada: 'conta' as 'conta' | 'cartao',
     frequencia: 'mensal' as 'mensal' | 'bimestral' | 'trimestral' | 'semestral' | 'anual',
     parcelas: ''
   });
@@ -31,13 +33,17 @@ export const CriarRecorrente = () => {
     e.preventDefault();
     
     try {
+      // Determinar se é conta ou cartão baseado na seleção
+      const isCartao = formData.tipoContaVinculada === 'cartao';
+      
       const novoRecorrente = {
         datainicial: formData.dataInicial,
         descricao: formData.descricao,
         categoria_id: formData.categoria,
         tipo: formData.tipo,
         valor: parseFloat(formData.valor),
-        conta_id: formData.contaVinculada,
+        // Apenas definir conta_id se for uma conta real, não cartão
+        conta_id: isCartao ? null : formData.contaVinculada,
         frequencia: formData.frequencia,
         parcelas: formData.parcelas ? parseInt(formData.parcelas) : null,
         parcelasgeradas: 0,
@@ -45,7 +51,8 @@ export const CriarRecorrente = () => {
         ativo: true
       };
 
-      await gerarLancamentosRecorrentes(novoRecorrente);
+      // Passar o ID do cartão separadamente se for cartão
+      await gerarLancamentosRecorrentes(novoRecorrente, isCartao ? formData.contaVinculada : null);
       
       setFormData({
         dataInicial: new Date().toISOString().split('T')[0],
@@ -54,6 +61,7 @@ export const CriarRecorrente = () => {
         tipo: 'despesa',
         valor: '',
         contaVinculada: '',
+        tipoContaVinculada: 'conta',
         frequencia: 'mensal',
         parcelas: ''
       });
@@ -64,7 +72,17 @@ export const CriarRecorrente = () => {
     }
   };
 
-  const contasECartoes = [...contas, ...cartoes];
+  const handleContaChange = (value: string) => {
+    // Determinar se é conta ou cartão baseado no valor selecionado
+    const isConta = contas.some(conta => conta.id === value);
+    const isCartao = cartoes.some(cartao => cartao.id === value);
+    
+    setFormData(prev => ({
+      ...prev,
+      contaVinculada: value,
+      tipoContaVinculada: isConta ? 'conta' : 'cartao'
+    }));
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -148,14 +166,19 @@ export const CriarRecorrente = () => {
 
           <div>
             <Label htmlFor="conta">Conta/Cartão</Label>
-            <Select value={formData.contaVinculada} onValueChange={(value) => setFormData(prev => ({ ...prev, contaVinculada: value }))}>
+            <Select value={formData.contaVinculada} onValueChange={handleContaChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma conta" />
               </SelectTrigger>
               <SelectContent>
-                {contasECartoes.map(item => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.nome}
+                {contas.map(conta => (
+                  <SelectItem key={conta.id} value={conta.id}>
+                    {conta.nome} (Conta)
+                  </SelectItem>
+                ))}
+                {cartoes.map(cartao => (
+                  <SelectItem key={cartao.id} value={cartao.id}>
+                    {cartao.nome} (Cartão)
                   </SelectItem>
                 ))}
               </SelectContent>
