@@ -1,7 +1,7 @@
 
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
 import { AcoesLancamento } from './AcoesLancamento';
-import { Calendar, Tag, TrendingUp, TrendingDown } from 'lucide-react';
+import { Calendar, Tag, TrendingUp, TrendingDown, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
