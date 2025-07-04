@@ -26,7 +26,9 @@ import {
   TrendingDown,
   LogOut,
   CreditCard,
-  BarChart3
+  BarChart3,
+  Calendar,
+  Filter
 } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -133,10 +135,10 @@ export const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
+          <p className="text-slate-300">Carregando...</p>
         </div>
       </div>
     );
@@ -147,26 +149,35 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-900 text-slate-100">
       <ConnectionStatus connected={connected} />
       
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-slate-800 shadow-lg border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-3">
-              <DollarSign className="w-8 h-8 text-green-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestão Financeira</h1>
+              <DollarSign className="w-8 h-8 text-green-400" />
+              <h1 className="text-2xl font-bold text-slate-100">Gestão Financeira</h1>
             </div>
             
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Sair
-            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-slate-300">
+                <Calendar className="w-4 h-4" />
+                {new Date().toLocaleDateString('pt-BR', { 
+                  year: 'numeric', 
+                  month: 'long' 
+                })}
+              </div>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="flex items-center gap-2 bg-slate-700 border-slate-600 text-slate-100 hover:bg-slate-600"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -174,12 +185,18 @@ export const Dashboard = () => {
       {/* Conteúdo Principal */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-800 border-slate-700">
+            <TabsTrigger 
+              value="dashboard" 
+              className="flex items-center gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
+            >
               <BarChart3 className="w-4 h-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="projecoes" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="projecoes" 
+              className="flex items-center gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
+            >
               <CreditCard className="w-4 h-4" />
               Projeções
             </TabsTrigger>
@@ -187,10 +204,13 @@ export const Dashboard = () => {
 
           <TabsContent value="dashboard" className="space-y-8">
             {/* Ações Rápidas */}
-            <Card>
+            <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-slate-100 flex items-center gap-2">
+                  <PlusCircle className="w-5 h-5 text-green-400" />
+                  Ações Rápidas
+                </CardTitle>
+                <CardDescription className="text-slate-400">
                   Gerencie suas finanças criando lançamentos, contas e categorias
                 </CardDescription>
               </CardHeader>
@@ -206,14 +226,24 @@ export const Dashboard = () => {
             </Card>
 
             {/* Filtros */}
-            <FiltrosDashboard
-              categorias={categorias}
-              contas={contas}
-              cartoes={cartoes}
-              filtros={filtros}
-              setFiltros={setFiltros}
-              onLimparFiltros={limparFiltros}
-            />
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-slate-100 flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-blue-400" />
+                  Filtros
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FiltrosDashboard
+                  categorias={categorias}
+                  contas={contas}
+                  cartoes={cartoes}
+                  filtros={filtros}
+                  setFiltros={setFiltros}
+                  onLimparFiltros={limparFiltros}
+                />
+              </CardContent>
+            </Card>
 
             {/* Estatísticas */}
             <EstatisticasDashboard 

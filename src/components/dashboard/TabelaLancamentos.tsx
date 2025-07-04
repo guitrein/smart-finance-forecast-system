@@ -1,6 +1,7 @@
 
 import { Lancamento, Categoria, Conta, Cartao } from '@/types';
 import { AcoesLancamento } from './AcoesLancamento';
+import { Calendar, Tag, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface TabelaLancamentosProps {
   lancamentos: Lancamento[];
@@ -18,73 +19,90 @@ export const TabelaLancamentos = ({
   formatarMoeda 
 }: TabelaLancamentosProps) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
-      <div className="p-6 border-b">
-        <h2 className="text-lg font-semibold">Lançamentos Recentes</h2>
+    <div className="bg-slate-800 rounded-lg shadow-lg border border-slate-700">
+      <div className="p-6 border-b border-slate-700">
+        <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-blue-400" />
+          Lançamentos Recentes
+        </h2>
+        <p className="text-sm text-slate-400 mt-1">
+          Últimos {Math.min(10, lancamentos.length)} lançamentos do período selecionado
+        </p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-slate-900">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 Data
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 Descrição
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 Categoria
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 Tipo
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 Valor
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 Ações
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-slate-800 divide-y divide-slate-700">
             {lancamentos.slice(0, 10).map((lancamento) => {
               const categoria = categorias.find(c => c.id === lancamento.categoria_id);
               return (
-                <tr key={lancamento.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <tr key={lancamento.id} className="hover:bg-slate-700 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
                     {new Date(lancamento.data).toLocaleDateString('pt-BR')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {lancamento.descricao}
-                    {lancamento.parcelado && (
-                      <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                        {lancamento.parcelaatual}/{lancamento.numeroparcelas}
-                      </span>
-                    )}
+                  <td className="px-6 py-4 text-sm text-slate-200">
+                    <div className="flex flex-col">
+                      <span className="font-medium">{lancamento.descricao}</span>
+                      {lancamento.parcelado && (
+                        <span className="mt-1 px-2 py-1 text-xs bg-blue-600/20 text-blue-300 rounded-full w-fit">
+                          Parcela {lancamento.parcelaatual}/{lancamento.numeroparcelas}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
                     {categoria && (
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full w-fit">
                         <span>{categoria.icone}</span>
-                        {categoria.nome}
+                        <span className="text-slate-300">{categoria.nome}</span>
                       </span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      lancamento.tipo === 'receita' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {lancamento.tipo === 'receita' ? 'Receita' : 'Despesa'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {lancamento.tipo === 'receita' ? (
+                        <TrendingUp className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <TrendingDown className="w-4 h-4 text-red-400" />
+                      )}
+                      <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                        lancamento.tipo === 'receita' 
+                          ? 'bg-green-500/20 text-green-300 border border-green-500/30' 
+                          : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                      }`}>
+                        {lancamento.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <span className={lancamento.tipo === 'receita' ? 'text-green-600' : 'text-red-600'}>
+                    <span className={`font-bold ${
+                      lancamento.tipo === 'receita' ? 'text-green-400' : 'text-red-400'
+                    }`}>
                       {lancamento.tipo === 'receita' ? '+' : '-'}{formatarMoeda(lancamento.valor)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                     <AcoesLancamento 
                       lancamento={lancamento}
                       categorias={categorias}
@@ -97,6 +115,13 @@ export const TabelaLancamentos = ({
             })}
           </tbody>
         </table>
+        
+        {lancamentos.length === 0 && (
+          <div className="text-center py-8 text-slate-400">
+            <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>Nenhum lançamento encontrado no período selecionado</p>
+          </div>
+        )}
       </div>
     </div>
   );
